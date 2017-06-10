@@ -1,0 +1,60 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+sourceCompatibility = '1.8'
+
+mainClassName = 'com.quickserverlab.restmcache.RestMCache'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    capsule
+}
+
+dependencies {
+	compile 'org.glassfish.jersey.core:jersey-common:2.22.2'
+
+    compile 'io.dropwizard:dropwizard-core:0.9.2'
+    capsule 'co.paralleluniverse:capsule:0.4.0'
+    compile 'io.dropwizard:dropwizard-db:0.9.2'
+    compile 'io.dropwizard:dropwizard-jdbi:0.9.2'
+	compile 'com.h2database:h2:1.4.178'
+	
+	compile 'com.squareup.okhttp3:okhttp:3.2.0'
+	compile 'com.google.code.gson:gson:2.6.2'
+	
+    testCompile 'junit:junit:4.11'
+    
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+run {
+    systemProperty "restmcache.config", "build/resources/main/restmcache.yml"
+    //systemProperty "restmcache.config", "cfg/restmcache.yml"
+}
+
+task capsule(type: Jar, dependsOn: classes) {
+    archiveName = "restmcache.jar"
+
+    from jar // embed our application jar
+    from { configurations.runtime } // embed dependencies
+    from { sourceSets.main.resources }
+
+    from(configurations.capsule.collect { zipTree(it) }) { include 'Capsule.class' } // we just need the single Capsule class
+
+    manifest {
+        attributes(
+            'Main-Class'  :   'Capsule',
+            'Application-Class'   : mainClassName,
+            'Application-Version' : version,
+            'Min-Java-Version' : '1.8.0',
+            'JVM-Args' : run.jvmArgs.join(' '),
+            //'System-Properties' : run.systemProperties.collect { k,v -> "$k=$v" }.join(' '),
+            'System-Properties' : (run.systemProperties + ["restmcache.config": '$CAPSULE_DIR/cfg/restmcache.yml']).collect { k,v -> "$k=$v" }.join(' '),
+            //'System-Properties' : (run.systemProperties + ["restmcache.config": './cfg/restmcache.yml']).collect { k,v -> "$k=$v" }.join(' '),
+        )
+    }
+}

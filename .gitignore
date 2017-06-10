@@ -1,0 +1,5 @@
+# Gradle files
+.gradle/
+.nb-gradle/
+build/
+logs/
