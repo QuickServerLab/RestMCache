@@ -1,0 +1,4 @@
+cacheImplClass: com.quickserverlab.restmcache.core.impl.softreferencemap.SoftReferenceMapImpl
+charSet: utf-8
+flushOnLowMemoryPercent: 95
+saveCacheToDiskBwRestarts: false
